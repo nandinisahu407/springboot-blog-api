@@ -2,6 +2,8 @@ package com.example.blog.controllers;
 
 import com.example.blog.dto.UserDto;
 import com.example.blog.entity.User;
+import com.example.blog.exceptions.UserAlreadyExist;
+import com.example.blog.exceptions.UserException;
 import com.example.blog.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,9 +21,14 @@ public class UserController {
 
     //create
     @PostMapping("/")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
-        UserDto createdUser=this.userService.createUser(userDto);
-        return  new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    public ResponseEntity<Object> createUser(@RequestBody UserDto userDto){
+        try {
+            UserDto createdUser=this.userService.createUser(userDto);
+            return  new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        }catch(UserAlreadyExist ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     //update

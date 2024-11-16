@@ -2,6 +2,8 @@ package com.example.blog.services.impl;
 
 import com.example.blog.dto.UserDto;
 import com.example.blog.entity.User;
+import com.example.blog.exceptions.UserAlreadyExist;
+import com.example.blog.exceptions.UserNotFoundException;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if(userRepository.findById(userDto.getId()).isPresent()){
+            throw new UserAlreadyExist("User Id: "+userDto.getId()+" Already exists, canot create new user!");
+        }
         User user=this.dtoToEntity(userDto);
         User saveduser=this.userRepository.save(user);
         return this.EntityTODto(saveduser);
@@ -25,10 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String updateUser(UserDto userDto, Integer userId) {
-        if(userRepository.findById(userId).isEmpty()){
-            return "Could not update,User with userId:"+userId+" does not exist!";
-        }
-        User user=this.userRepository.findById(userId).orElseThrow(()->new RuntimeException("not found"));
+        User user=this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException("User with userId:"+userId+" does not exist,cannot update!"));
         user.setUserName(userDto.getUserName());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
@@ -40,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Integer userId) {
-        User user=userRepository.findById(userId).orElseThrow(()-> new RuntimeException("user not found!"));
+        User user=userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException("User with userId:"+userId+" does not exist!"));
         return this.EntityTODto(user);
     }
 
@@ -54,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String deleteUser(Integer userId) {
-         User user=this.userRepository.findById(userId).orElseThrow(()->new RuntimeException("Cannot delete,No such user exists!"));
+         User user=this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException("User with userId:"+userId+" does not exist,cannot delete!"));
          this.userRepository.deleteById(userId);
          return "Successfully deleted";
     }
