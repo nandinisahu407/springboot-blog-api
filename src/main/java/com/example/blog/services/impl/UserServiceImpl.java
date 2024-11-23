@@ -6,6 +6,7 @@ import com.example.blog.exceptions.UserAlreadyExist;
 import com.example.blog.exceptions.UserNotFoundException;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.services.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -62,22 +65,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private User dtoToEntity(UserDto dto){
-        User user=new User();
-        user.setId(dto.getId());
-        user.setUserName(dto.getUserName());
-        user.setAbout(dto.getAbout());
-        user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        User user=this.modelMapper.map(dto,User.class);
         return user;
     }
 
     private UserDto EntityTODto(User user){
-        UserDto dto=new UserDto();
-        dto.setId(user.getId());
-        dto.setUserName(user.getUserName());
-        dto.setEmail(user.getEmail());
-        dto.setPassword(user.getPassword());
-        dto.setAbout(user.getAbout());
+        UserDto dto=this.modelMapper.map(user,UserDto.class);
         return dto;
     }
 

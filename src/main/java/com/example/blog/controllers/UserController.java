@@ -5,7 +5,9 @@ import com.example.blog.entity.User;
 import com.example.blog.exceptions.UserAlreadyExist;
 import com.example.blog.exceptions.UserException;
 import com.example.blog.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ public class UserController {
 
     //create
     @PostMapping("/")
-    public ResponseEntity<Object> createUser(@RequestBody UserDto userDto){
+    public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto){
         try {
             UserDto createdUser=this.userService.createUser(userDto);
             return  new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -33,7 +35,7 @@ public class UserController {
 
     //update
     @PutMapping("/{userId}")
-    public String updateDetails(@RequestBody UserDto userDto, @PathVariable Integer userId){
+    public String updateDetails(@Valid @RequestBody UserDto userDto, @PathVariable Integer userId){
         if(userDto==null){
             return "Body cannot be null!";
         }
