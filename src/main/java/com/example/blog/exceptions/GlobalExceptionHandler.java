@@ -23,4 +23,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<Map<String,String>>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex){
+        String msg=ex.getMessage();
+        return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserAlreadyExist.class)
+    public ResponseEntity<String> handleUserAlreadyExistException(UserAlreadyExist ex){
+        return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
+    }
+
+
 }

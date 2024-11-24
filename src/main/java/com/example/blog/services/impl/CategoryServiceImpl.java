@@ -2,6 +2,7 @@ package com.example.blog.services.impl;
 
 import com.example.blog.dto.CategoryDto;
 import com.example.blog.entity.Category;
+import com.example.blog.exceptions.ResourceNotFoundException;
 import com.example.blog.repository.CategoryRepository;
 import com.example.blog.services.CategoryService;
 import org.modelmapper.ModelMapper;
@@ -26,7 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public String updateCategory(CategoryDto categoryDto, Integer categoryId) {
-        Category cat=this.categoryRepository.findById(categoryId).orElseThrow(()-> new RuntimeException("category not found"));
+        Category cat=this.categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","category ID",categoryId));
         cat.setCategoryTitle(categoryDto.getCategoryTitle());
         cat.setCategoryDescription(categoryDto.getCategoryDescription());
         this.categoryRepository.save(cat);
@@ -35,14 +36,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public String deleteCategory(Integer categoryId) {
-        Category cat=this.categoryRepository.findById(categoryId).orElseThrow(()-> new RuntimeException("category not found"));
+        Category cat=this.categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","category ID",categoryId));
         this.categoryRepository.deleteById(categoryId);
         return "Deleted Successfully";
     }
 
     @Override
     public CategoryDto getCategoryById(Integer categoryId) {
-        Category cat=this.categoryRepository.findById(categoryId).orElseThrow(()-> new RuntimeException("category not found"));
+        Category cat=this.categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","category ID",categoryId));
         return this.modelMapper.map(cat,CategoryDto.class);
     }
 

@@ -1,12 +1,16 @@
 package com.example.blog.exceptions;
 
-public class UserAlreadyExist extends RuntimeException{
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
+@Getter
+@Setter
+public class UserAlreadyExist extends RuntimeException{
+    private  String message;
     public UserAlreadyExist(String message) {
         super(message);
+        this.message = message;
     }
 
-    public UserAlreadyExist(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

@@ -2,8 +2,8 @@ package com.example.blog.services.impl;
 
 import com.example.blog.dto.UserDto;
 import com.example.blog.entity.User;
+import com.example.blog.exceptions.ResourceNotFoundException;
 import com.example.blog.exceptions.UserAlreadyExist;
-import com.example.blog.exceptions.UserNotFoundException;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.services.UserService;
 import org.modelmapper.ModelMapper;
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String updateUser(UserDto userDto, Integer userId) {
-        User user=this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException("User with userId:"+userId+" does not exist,cannot update!"));
+        User user=this.userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","user ID",userId));
         user.setUserName(userDto.getUserName());
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Integer userId) {
-        User user=userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException("User with userId:"+userId+" does not exist!"));
+        User user=userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","user ID",userId));
         return this.EntityTODto(user);
     }
 
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String deleteUser(Integer userId) {
-         User user=this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException("User with userId:"+userId+" does not exist,cannot delete!"));
+         User user=this.userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User","user ID",userId));
          this.userRepository.deleteById(userId);
          return "Successfully deleted";
     }

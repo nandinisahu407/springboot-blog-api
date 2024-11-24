@@ -1,13 +1,10 @@
 package com.example.blog.controllers;
 
 import com.example.blog.dto.UserDto;
-import com.example.blog.entity.User;
 import com.example.blog.exceptions.UserAlreadyExist;
-import com.example.blog.exceptions.UserException;
 import com.example.blog.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
