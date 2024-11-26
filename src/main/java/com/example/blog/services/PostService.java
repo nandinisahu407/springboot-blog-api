@@ -8,18 +8,18 @@ import java.util.List;
 
 public interface PostService {
     //crud
-    Post createPost(PostDto postDto,Integer userID,Integer categoryId) ;
+    PostDto createPost(PostDto postDto,Integer userID,Integer categoryId) ;
 
     String updatePost(PostDto postDto, Integer postId);
     String deletePost(Integer postId);
-    List<Post> getAllPosts();
-    Post getPostById(Integer postId);
+    List<PostDto> getAllPosts();
+    PostDto getPostById(Integer postId);
 
     //get all posts by user, category
-    List<Post> getAllPostsByUser(Integer userId);
-    List<Post> getAllPostsByCategory(Integer categoryId);
+    List<PostDto> getAllPostsByUser(Integer userId);
+    List<PostDto> getAllPostsByCategory(Integer categoryId);
 
     //search posts by keyword
-    List<Post> searchPost(String keyword);
+    List<PostDto> searchPost(String keyword);
 
 }
