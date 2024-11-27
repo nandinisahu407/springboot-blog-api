@@ -5,12 +5,17 @@ import com.example.blog.entity.Category;
 import com.example.blog.entity.Post;
 import com.example.blog.entity.User;
 import com.example.blog.exceptions.ResourceNotFoundException;
+import com.example.blog.payload.PostResponse;
 import com.example.blog.repository.CategoryRepository;
 import com.example.blog.repository.PostRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.services.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -47,12 +52,27 @@ public class PostServiceImpl implements PostService {
     @Override
     public String updatePost(PostDto postDto, Integer postId) {
         Post post=this.postRepository.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post","post ID",postId));
-        post.setCategory(this.modelMapper.map((postDto.getCategory()),Category.class));
-        post.setUser(this.modelMapper.map((postDto.getUser()),User.class));
-        post.setContent(postDto.getContent());
-        post.setTitle(postDto.getTitle());
-        post.setImageName(postDto.getImageName());
-        post.setAddedDate(postDto.getAddedDate());
+
+        //only fields provided in request are updated
+        if(postDto.getUser()!=null){
+            post.setUser(this.modelMapper.map((postDto.getUser()),User.class));
+        }
+        if(postDto.getCategory()!=null){
+            post.setCategory(this.modelMapper.map((postDto.getCategory()),Category.class));
+        }
+        if(postDto.getTitle()!=null){
+            post.setTitle(postDto.getTitle());
+        }
+        if(postDto.getContent()!=null){
+            post.setContent(postDto.getContent());
+        }
+        if(postDto.getImageName()!=null){
+            post.setImageName(postDto.getImageName());
+        }
+        if(postDto.getAddedDate()!=null){
+            post.setAddedDate(postDto.getAddedDate());
+        }
+
         this.postRepository.save(post);
         return "Updated Post Successfully!!";
     }
@@ -65,10 +85,22 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> getAllPosts() {
-        List<Post> posts=this.postRepository.findAll();
-        List<PostDto> postDtos=posts.stream().map((post)->this.modelMapper.map(post,PostDto.class)).collect(Collectors.toList());
-        return postDtos;
+    public PostResponse getAllPosts(Integer pageNumber, Integer pageSize,String sortBy,String sortDir) {
+        Sort sort=(sortDir.equalsIgnoreCase("asc")?Sort.by(sortBy).ascending():Sort.by(sortBy).descending());
+
+        Pageable p= PageRequest.of(pageNumber,pageSize, sort);
+        Page<Post> pagePosts=this.postRepository.findAll(p);
+        List<Post> allPosts=pagePosts.getContent();
+
+        List<PostDto> postDtos=allPosts.stream().map((post)->this.modelMapper.map(post,PostDto.class)).collect(Collectors.toList());
+        PostResponse response=new PostResponse();
+        response.setContent(postDtos);
+        response.setPageNumber(pagePosts.getNumber());
+        response.setPageSize(pagePosts.getSize());
+        response.setTotalElements(pagePosts.getTotalElements());
+        response.setTotalPages(pagePosts.getTotalPages());
+        response.setLastPage(pagePosts.isLast());
+        return response;
     }
 
     @Override

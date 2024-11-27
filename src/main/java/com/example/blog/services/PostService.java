@@ -3,6 +3,7 @@ package com.example.blog.services;
 import com.example.blog.dto.PostDto;
 import com.example.blog.entity.Post;
 import com.example.blog.entity.User;
+import com.example.blog.payload.PostResponse;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface PostService {
 
     String updatePost(PostDto postDto, Integer postId);
     String deletePost(Integer postId);
-    List<PostDto> getAllPosts();
+    PostResponse getAllPosts(Integer pageNumber, Integer pageSize,String sortBy,String sortDir);
     PostDto getPostById(Integer postId);
 
     //get all posts by user, category

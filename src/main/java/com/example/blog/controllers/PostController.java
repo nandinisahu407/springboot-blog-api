@@ -2,6 +2,7 @@ package com.example.blog.controllers;
 
 import com.example.blog.dto.PostDto;
 import com.example.blog.entity.Post;
+import com.example.blog.payload.PostResponse;
 import com.example.blog.services.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,9 +65,14 @@ public class PostController {
 
     //all posts
     @GetMapping("/allpost")
-    public ResponseEntity<List<PostDto>> getAllPosts(){
-        List<PostDto> post=this.postService.getAllPosts();
-        return new ResponseEntity<>(post,HttpStatus.OK);
+    public ResponseEntity<PostResponse> getAllPosts(
+            @RequestParam(value="pageNumber",defaultValue = "0",required=false) Integer pageNumber,
+            @RequestParam(value = "pageSize",defaultValue = "5",required = false) Integer pageSize,
+            @RequestParam(value = "sortBy",defaultValue = "postId",required = false) String sortBy,
+            @RequestParam(value = "sortDir",defaultValue = "asc",required = false) String sortDir
+    ){
+        PostResponse response=this.postService.getAllPosts(pageNumber,pageSize,sortBy,sortDir);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
 
