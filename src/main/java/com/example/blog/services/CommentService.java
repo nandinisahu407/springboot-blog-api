@@ -13,4 +13,7 @@ public interface CommentService {
     String updateComment(CommentDto commentDto,Integer commentId,Integer postId,Integer userId);
 
     List<CommentDto> getAllComments(Integer postId);
+
+    //reply to  comment
+    CommentDto createReplyToComment(Integer postId,Integer parentCommentId, Integer userId, CommentDto replyComment);
 }

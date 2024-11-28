@@ -49,4 +49,16 @@ public class CommentController {
             return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
+    //reply to comment
+    @PostMapping("/post/{postId}/comment/{parentCommentId}/replies")
+    public ResponseEntity<CommentDto> createReply(
+            @PathVariable Integer postId,
+            @PathVariable Integer parentCommentId,
+            @RequestParam Integer userId,
+            @RequestBody CommentDto commentDto) {
+
+        CommentDto reply = this.commentService.createReplyToComment(postId,parentCommentId,userId,commentDto);
+        return new ResponseEntity<>(reply, HttpStatus.CREATED);
+    }
+
 }

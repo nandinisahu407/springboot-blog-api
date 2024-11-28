@@ -65,12 +65,51 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getAllComments(Integer postId) {
         Post post=this.postRepository.findById(postId).orElseThrow(()->new ResourceNotFoundException("Post","post id",postId));
         List<Comment> comments = commentRepository.findCommentByPostId(postId);
+
         return comments.stream()
-                .map(comment -> new CommentDto(
-                        comment.getCommentId(),
-                        comment.getContent(),
-                        comment.getUser().getUserName() // Fetch user's name
-                ))
+                .map(comment -> {
+                    // Create the CommentDto for the top-level comment
+                    CommentDto commentDto = new CommentDto(
+                            comment.getCommentId(),
+                            comment.getContent(),
+                            comment.getUser().getUserName() // Fetch user's name
+                    );
+
+                    //  map its replies
+                    comment.getReplies().forEach(reply -> {
+                        // Map each reply recursively
+                        CommentDto replyDto = new CommentDto(
+                                reply.getCommentId(),
+                                reply.getContent(),
+                                reply.getUser().getUserName() // Fetch user's name for reply
+                        );
+                        commentDto.addReply(replyDto); // Add the reply to the current comment
+                    });
+
+                    return commentDto;
+                })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public CommentDto createReplyToComment(Integer postId, Integer parentCommentId, Integer userId, CommentDto replyComment) {
+        Post post=this.postRepository.findById(postId).orElseThrow(()->new ResourceNotFoundException("Post","post id",postId));
+        Comment parentComment=this.commentRepository.findById(parentCommentId).orElseThrow(()->new ResourceNotFoundException("Comment","comment id",parentCommentId));
+        User user= this.userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User","user id",userId));
+
+        Comment reply=this.modelMapper.map(replyComment,Comment.class);
+        reply.setUser(user);
+        reply.setPost(post);
+        reply.setParentComment(parentComment);
+
+        //parent comment list-> update karo with new reply
+        parentComment.getReplies().add(reply);
+        commentRepository.save(reply);
+        commentRepository.save(parentComment);
+
+        CommentDto dto=new CommentDto(reply.getCommentId(),reply.getContent(),user.getUserName());
+        return dto;
+    }
+
+
 }
