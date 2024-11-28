@@ -20,6 +20,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
     private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
     @Autowired
     private JwtHelper jwtHelper;
@@ -69,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         //
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //fetch user detail from username
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = this.customUserDetailService.loadUserByUsername(username);
             Boolean validateToken = this.jwtHelper.validateToken(token, userDetails);
             if (validateToken) {
                 //set the authentication
@@ -81,6 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 logger.info("Validation fails !!");
             }
 
+        } else{
+            System.out.println("username is null or context is null");
         }
 
         filterChain.doFilter(request, response);

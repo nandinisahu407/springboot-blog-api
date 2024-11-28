@@ -8,6 +8,7 @@ import com.example.blog.repository.UserRepository;
 import com.example.blog.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +22,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public UserDto createUser(UserDto userDto) {
         if(userRepository.findById(userDto.getId()).isPresent()){
             throw new UserAlreadyExist("User Id: "+userDto.getId()+" Already exists, canot create new user!");
         }
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        userDto.setPassword(encodedPassword);
         User user=this.dtoToEntity(userDto);
         User saveduser=this.userRepository.save(user);
         return this.EntityTODto(saveduser);
@@ -36,7 +42,9 @@ public class UserServiceImpl implements UserService {
         User user=this.userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","user ID",userId));
         user.setUserName(userDto.getUserName());
         user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
+        if (!userDto.getPassword().equals(user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
         user.setAbout(userDto.getAbout());
 
         this.userRepository.save(user);

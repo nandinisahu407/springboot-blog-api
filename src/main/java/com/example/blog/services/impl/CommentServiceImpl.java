@@ -72,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
                     CommentDto commentDto = new CommentDto(
                             comment.getCommentId(),
                             comment.getContent(),
-                            comment.getUser().getUserName() // Fetch user's name
+                            comment.getUser().getname() // Fetch user's name
                     );
 
                     //  map its replies
@@ -81,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
                         CommentDto replyDto = new CommentDto(
                                 reply.getCommentId(),
                                 reply.getContent(),
-                                reply.getUser().getUserName() // Fetch user's name for reply
+                                reply.getUser().getname() // Fetch user's name for reply
                         );
                         commentDto.addReply(replyDto); // Add the reply to the current comment
                     });
@@ -107,7 +107,7 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.save(reply);
         commentRepository.save(parentComment);
 
-        CommentDto dto=new CommentDto(reply.getCommentId(),reply.getContent(),user.getUserName());
+        CommentDto dto=new CommentDto(reply.getCommentId(),reply.getContent(),user.getname());
         return dto;
     }
 
