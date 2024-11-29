@@ -35,7 +35,14 @@ This blog backend system provides secure user authentication, role-based authori
 
 3. **Viewer:**
    - Can only view posts and comments (GET methods). No permission for CRUD operations.
+<br></br>
+## Screenshots:
 
+Check out this docs to see screenshots of Role-Based Access Control in action, along with other key functionalities.
+https://docs.google.com/document/d/1T_nihtBvzPMjQdmnpDDkCgVwzG_AzV9wmco2tvInM-Y/edit?usp=sharing
+
+  
+<br></br>
 ## How to Run Locally
 
 1. **Clone the Repository:**
