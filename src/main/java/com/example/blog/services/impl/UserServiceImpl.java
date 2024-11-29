@@ -1,9 +1,11 @@
 package com.example.blog.services.impl;
 
 import com.example.blog.dto.UserDto;
+import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.exceptions.ResourceNotFoundException;
 import com.example.blog.exceptions.UserAlreadyExist;
+import com.example.blog.repository.RoleRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.services.UserService;
 import org.modelmapper.ModelMapper;
@@ -24,6 +26,19 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Override
+    public UserDto registerNewUser(UserDto userDto) {
+        User user=this.modelMapper.map(userDto,User.class);
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+        //assign role
+        Role role=this.roleRepository.findById(2).get();   //by default assign 'normal' role to user while creating -> 2
+        user.getRoles().add(role);
+        User saveduser=this.userRepository.save(user);
+        return this.modelMapper.map(saveduser,UserDto.class);
+    }
 
     @Override
     public UserDto createUser(UserDto userDto) {

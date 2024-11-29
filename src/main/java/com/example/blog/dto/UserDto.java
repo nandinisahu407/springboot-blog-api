@@ -1,9 +1,13 @@
 package com.example.blog.dto;
 
+import com.example.blog.entity.Role;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @NoArgsConstructor
 @Getter
@@ -20,4 +24,5 @@ public class UserDto {
     @Size(min = 6,message = "Password should be of min length 6")
     private String password;
     private String about;
+    private Set<RoleDto> roles=new HashSet<>();
 }

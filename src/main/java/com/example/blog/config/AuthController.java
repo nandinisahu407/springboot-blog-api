@@ -1,5 +1,6 @@
 package com.example.blog.config;
 
+import com.example.blog.dto.UserDto;
 import com.example.blog.entity.User;
 import com.example.blog.exceptions.ResourceNotFoundException;
 import com.example.blog.model.JwtRequest;
@@ -31,6 +32,8 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private  UserService userService;
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -56,6 +59,12 @@ public class AuthController {
         response.setUsername(request.getEmail());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto){
+        UserDto registeredUser=this.userService.registerNewUser(userDto);
+        return new ResponseEntity<>(registeredUser,HttpStatus.CREATED);
     }
 
 
