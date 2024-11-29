@@ -73,7 +73,10 @@ public class PostController {
                 .anyMatch(role -> role.getName().equals("ROLE_NORMAL"));
         Post postTOBeUpdated=this.postRepository.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post","post ID ",postId));
         Integer postOwnerId = postTOBeUpdated.getUser().getId();
-        if (isNormalUser && (loggedInUser.getId()!=postOwnerId)) {
+        if ((isNormalUser && (loggedInUser.getId()!=postOwnerId))
+                && !securityUtils.hasRole("ROLE_ADMIN")
+                && !securityUtils.hasRole("ROLE_SUPER_ADMIN")
+        ) {
             return new ResponseEntity<>("Normal users can only update their own profile.", HttpStatus.FORBIDDEN);
         }
 
@@ -91,7 +94,10 @@ public class PostController {
                 .anyMatch(role -> role.getName().equals("ROLE_NORMAL"));
         Post postTOBeDeleted=this.postRepository.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post","post ID ",postId));
         Integer postOwnerId = postTOBeDeleted.getUser().getId();
-        if (isNormalUser && (loggedInUser.getId()!=postOwnerId)) {
+        if ((isNormalUser && (loggedInUser.getId()!=postOwnerId))
+                && !securityUtils.hasRole("ROLE_ADMIN")
+                && !securityUtils.hasRole("ROLE_SUPER_ADMIN")
+        ) {
             return new ResponseEntity<>("Normal users can only delete their own profile.", HttpStatus.FORBIDDEN);
         }
 
