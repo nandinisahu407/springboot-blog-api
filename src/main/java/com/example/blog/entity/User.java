@@ -52,6 +52,7 @@ public class User implements UserDetails {
     //---------------- implement UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        System.out.println("----- inside granting authorities ------------");
         List<SimpleGrantedAuthority> authorities=this.roles.stream().map((role)-> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
         return authorities;
     }

@@ -44,7 +44,9 @@ public class AuthController {
 
         User user=this.userRepository.findByEmail(request.getEmail()).orElseThrow(()-> new ResourceNotFoundException("User","email: "+request.getEmail(),0));
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+            JwtResponse response=new JwtResponse();
+            response.setUsername("Invalid credentials, the password you have entered is incorrect !!");
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
