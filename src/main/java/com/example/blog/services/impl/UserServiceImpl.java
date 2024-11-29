@@ -87,6 +87,18 @@ public class UserServiceImpl implements UserService {
          return "Successfully deleted";
     }
 
+    @Override
+    public String assignRole(Integer userId, Role role) {
+        User user=this.userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User","user ID",userId));
+
+        if(!user.getRoles().contains(role)){
+            user.getRoles().add(role);
+            this.userRepository.save(user);
+            return "Successfully Assigned "+role.getName()+" to user : "+user.getUsername();
+        }
+        return "Required role is already assigned to user :"+user.getUsername();
+    }
+
     private User dtoToEntity(UserDto dto){
         User user=this.modelMapper.map(dto,User.class);
         return user;

@@ -1,6 +1,8 @@
 package com.example.blog.services;
 
 import com.example.blog.dto.UserDto;
+import com.example.blog.entity.Role;
+import com.example.blog.entity.User;
 
 import java.util.List;
 
@@ -11,4 +13,5 @@ public interface UserService {
     UserDto getUserById(Integer userId);
     List<UserDto> getAllUsers();
     String deleteUser(Integer userId);
+    String assignRole(Integer userId, Role role);
 }
