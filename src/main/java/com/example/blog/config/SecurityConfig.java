@@ -15,21 +15,34 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableMethodSecurity
+@EnableWebMvc
 public class SecurityConfig {
     @Autowired
     private JwtAuthenticationEntryPoint point;
     @Autowired
     private JwtAuthenticationFilter filter;
 
+    public static final String[] PUBLIC_ULS = {
+            "/api/v1/auth/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/v2/api-docs/**"
+    };
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth-> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(PUBLIC_ULS).permitAll()
                         .requestMatchers("/api/users/*/assignRole").hasAnyRole("ADMIN","SUPER_ADMIN") // Protect the role assignment endpoint
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEWER", "NORMAL", "ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
