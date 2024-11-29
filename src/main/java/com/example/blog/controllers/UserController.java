@@ -1,8 +1,10 @@
 package com.example.blog.controllers;
 
+import com.example.blog.config.SecurityUtils;
 import com.example.blog.dto.RoleDto;
 import com.example.blog.dto.UserDto;
 import com.example.blog.entity.Role;
+import com.example.blog.entity.User;
 import com.example.blog.exceptions.UserAlreadyExist;
 import com.example.blog.services.RoleService;
 import com.example.blog.services.UserService;
@@ -25,12 +27,14 @@ public class UserController {
     private UserService userService;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     //create
     @PostMapping("/")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto){
         try {
-            UserDto createdUser=this.userService.createUser(userDto);
+            UserDto createdUser=this.userService.registerNewUser(userDto);
             return  new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         }catch(UserAlreadyExist ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -38,13 +42,24 @@ public class UserController {
 
     }
 
-    //update
+    //update-> (role: normal user can update only their own profiles)
     @PutMapping("/{userId}")
-    public String updateDetails(@Valid @RequestBody UserDto userDto, @PathVariable Integer userId){
+    public ResponseEntity<String> updateDetails(@Valid @RequestBody UserDto userDto, @PathVariable Integer userId){
         if(userDto==null){
-            return "Body cannot be null!";
+            return new ResponseEntity<>("Body cannot be null!",HttpStatus.BAD_REQUEST);
         }
-        return this.userService.updateUser(userDto,userId);
+
+        //normal user can update only their own profiles
+        User loggedInUser = securityUtils.getLoggedInUserDetails();
+        boolean isNormalUser = loggedInUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_NORMAL"));
+
+        if (isNormalUser && (loggedInUser.getId()!=userId)) {
+            return new ResponseEntity<>("Normal users can only update their own profile.", HttpStatus.FORBIDDEN);
+        }
+        //admin,super-admin,normal user(owner)
+        String response= this.userService.updateUser(userDto,userId);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     //get user by id
@@ -60,7 +75,7 @@ public class UserController {
     }
 
     //delete
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{userId}")
     public String deleteUser(@PathVariable Integer userId){
         return this.userService.deleteUser(userId);

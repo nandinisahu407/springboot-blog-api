@@ -1,8 +1,12 @@
 package com.example.blog.controllers;
 
+import com.example.blog.config.SecurityUtils;
 import com.example.blog.dto.PostDto;
 import com.example.blog.entity.Post;
+import com.example.blog.entity.User;
+import com.example.blog.exceptions.ResourceNotFoundException;
 import com.example.blog.payload.PostResponse;
+import com.example.blog.repository.PostRepository;
 import com.example.blog.services.FileService;
 import com.example.blog.services.PostService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,13 +32,18 @@ public class PostController {
     @Autowired
     private PostService postService;
     @Autowired
+    private PostRepository postRepository;
+    @Autowired
     private FileService fileService;
+    @Autowired
+    private SecurityUtils securityUtils;
     @Autowired
     private ModelMapper modelMapper;
     @Value("${project.image}")
     private String path;
 
     //create
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('NORMAL')")
     @PostMapping("/user/{userId}/category/{categoryId}/posts")
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId){
         PostDto savedPost=this.postService.createPost(postDto,userId,categoryId);
@@ -57,6 +67,17 @@ public class PostController {
     //update
     @PutMapping("/post/{postId}")
     public ResponseEntity<String> updatePost(@RequestBody PostDto updatedPost, @PathVariable Integer postId){
+        //normal user can update only their own profiles
+        User loggedInUser = securityUtils.getLoggedInUserDetails();
+        boolean isNormalUser = loggedInUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_NORMAL"));
+        Post postTOBeUpdated=this.postRepository.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post","post ID ",postId));
+        Integer postOwnerId = postTOBeUpdated.getUser().getId();
+        if (isNormalUser && (loggedInUser.getId()!=postOwnerId)) {
+            return new ResponseEntity<>("Normal users can only update their own profile.", HttpStatus.FORBIDDEN);
+        }
+
+        //admin,super-admin,normal(owner)
         String resp=this.postService.updatePost(updatedPost,postId);
         return new ResponseEntity<>(resp,HttpStatus.OK);
     }
@@ -64,6 +85,17 @@ public class PostController {
     //delete
     @DeleteMapping("/post/{postId}")
     public ResponseEntity<String> deletePost(@PathVariable Integer postId){
+        //normal user-> can delete its own post
+        User loggedInUser = securityUtils.getLoggedInUserDetails();
+        boolean isNormalUser = loggedInUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_NORMAL"));
+        Post postTOBeDeleted=this.postRepository.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post","post ID ",postId));
+        Integer postOwnerId = postTOBeDeleted.getUser().getId();
+        if (isNormalUser && (loggedInUser.getId()!=postOwnerId)) {
+            return new ResponseEntity<>("Normal users can only delete their own profile.", HttpStatus.FORBIDDEN);
+        }
+
+        //admin,super-admin,normal(owner)
         String resp=this.postService.deletePost(postId);
         return new ResponseEntity<>(resp,HttpStatus.OK);
     }
