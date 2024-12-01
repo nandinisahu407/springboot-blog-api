@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This blog backend system provides secure user authentication, role-based authorization, and CRUD operations for users, posts, and comments. It utilizes JWT (JSON Web Token) for secure authentication and role-based access control (RBAC) to restrict or allow access to resources based on the user's role.
+This blog backend system provides secure user authentication, role-based authorization, and CRUD operations for users, posts, and comments. It is deployed on **AWS Elastic Beanstalk** for scalable application hosting and uses **Amazon RDS** for database management. It utilizes JWT (JSON Web Token) for secure authentication and role-based access control (RBAC) to restrict or allow access to resources based on the user's role.
 
 ## Features
 
@@ -12,6 +12,9 @@ This blog backend system provides secure user authentication, role-based authori
   - Users can perform CRUD operations on their own posts and comments.
   - Admins and Super Admins have the ability to manage all posts and comments.
 - **Post and Comment System:** Allows users to create, update, delete, and view posts and comments.
+- **Deployed Infrastructure:**
+  - Hosted on **AWS Elastic Beanstalk** for the backend application.
+  - Database managed on **Amazon RDS**, ensuring reliability and performance.
   
 ## Tech Stack
 
@@ -43,6 +46,22 @@ https://docs.google.com/document/d/1T_nihtBvzPMjQdmnpDDkCgVwzG_AzV9wmco2tvInM-Y/
 
   
 <br></br>
+## Deployed Application
+The application has been deployed on **AWS Elastic Beanstalk** and **Amazon RDS**.  
+
+- **Base URL**: [blog-prod.eu-north-1.elasticbeanstalk.com](http://blog-prod.eu-north-1.elasticbeanstalk.com)
+- **Swagger UI**: [Blog Swagger API Documentation](http://blog-prod.eu-north-1.elasticbeanstalk.com/swagger-ui/index.html)
+
+### Authentication Workflow for first time Users
+1. **Register**:
+   - Send a `POST` request to the API: [Register API](http://blog-prod.eu-north-1.elasticbeanstalk.com/api/v1/auth/register)  
+     Provide valid user details in the request body.
+2. **Jwt token generation**:
+   - Send a `POST` request to the API: [Login API](http://blog-prod.eu-north-1.elasticbeanstalk.com/api/v1/auth/login)  
+     Provide valid credentials (username and password).
+   - Use the returned JWT token in the `Authorization` header as `Bearer <token>` to access other secured endpoints.
+  <br></br>
+
 ## How to Run Locally
 
 1. **Clone the Repository:**
