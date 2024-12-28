@@ -1,11 +1,13 @@
 package com.example.blog.controllers;
 
 import com.example.blog.config.SecurityUtils;
+import com.example.blog.constants.EntityType;
 import com.example.blog.dto.RoleDto;
 import com.example.blog.dto.UserDto;
 import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.exceptions.UserAlreadyExist;
+import com.example.blog.services.LogEntryService;
 import com.example.blog.services.RoleService;
 import com.example.blog.services.UserService;
 import jakarta.validation.Valid;
@@ -17,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -29,12 +33,24 @@ public class UserController {
     private RoleService roleService;
     @Autowired
     private SecurityUtils securityUtils;
+    @Autowired
+    private LogEntryService logEntryService;
 
     //create
     @PostMapping("/")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto){
         try {
             UserDto createdUser=this.userService.registerNewUser(userDto);
+
+            User loggedInUser = securityUtils.getLoggedInUserDetails();
+            //Adding logs
+            logEntryService.logAction(
+                    loggedInUser.getname(),
+                    "CREATED",
+                    EntityType.USER,
+                    userDto.getUserName(),
+                    "User created:"+userDto.getUserName()
+            );
             return  new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         }catch(UserAlreadyExist ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -59,6 +75,14 @@ public class UserController {
         }
         //admin,super-admin,normal user(owner)
         String response= this.userService.updateUser(userDto,userId);
+
+        logEntryService.logAction(
+                loggedInUser.getname(),
+                "UPDATE",
+                EntityType.USER,
+                userDto.getUserName(),
+                "Updated UserDetails:"+userDto.getUserName()
+        );
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
@@ -78,6 +102,16 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{userId}")
     public String deleteUser(@PathVariable Integer userId){
+        UserDto user=this.userService.getUserById(userId);
+        User loggedInUser = securityUtils.getLoggedInUserDetails();
+        //add activity logs
+        logEntryService.logAction(
+                loggedInUser.getname(),
+                "Delete",
+                EntityType.USER,
+                user.getUserName(),
+                "Deleter user:"+user.getUserName()
+        );
         return this.userService.deleteUser(userId);
     }
 
@@ -97,11 +131,22 @@ public class UserController {
 
         boolean isSuperAdmin = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+        User loggedInUser = securityUtils.getLoggedInUserDetails();
+        UserDto user=this.userService.getUserById(userId);
 
         // Admins can only assign "Normal" or "Viewer" roles
         if (isAdmin) {
             if (roleDto.getName().equals("ROLE_NORMAL") || roleDto.getName().equals("ROLE_VIEWER")) {
                 String response = this.userService.assignRole(userId, role);
+                //adding logs
+                logEntryService.logAction(
+                        loggedInUser.getname(),
+                        "ASSIGNING ROLE",
+                        EntityType.USER,
+                        user.getUserName(),
+                        response
+                );
+
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Admin can only assign Normal or Viewer roles.");
@@ -109,6 +154,14 @@ public class UserController {
         } else if (isSuperAdmin) {
             // Super Admin can assign any role
             String response = this.userService.assignRole(userId, role);
+            //adding logs
+            logEntryService.logAction(
+                    loggedInUser.getname(),
+                    "ASSIGNING ROLE",
+                    EntityType.USER,
+                    user.getUserName(),
+                    response
+            );
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have the required permissions.");

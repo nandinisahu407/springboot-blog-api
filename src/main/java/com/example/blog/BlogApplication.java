@@ -31,13 +31,13 @@ public class BlogApplication {
 			if (!roleRepository.existsById(1)) {
 				Role adminRole = new Role();
 				adminRole.setId(1);
-				adminRole.setName("ADMIN");
+				adminRole.setName("ROLE_ADMIN");
 				roleRepository.save(adminRole);
 			}
 			if (!roleRepository.existsById(2)) {
 				Role normalRole = new Role();
 				normalRole.setId(2);
-				normalRole.setName("NORMAL");
+				normalRole.setName("ROLE_NORMAL");
 				roleRepository.save(normalRole);
 			}
 		};

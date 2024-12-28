@@ -1,5 +1,6 @@
 package com.example.blog.config;
 
+import com.example.blog.constants.EntityType;
 import com.example.blog.dto.UserDto;
 import com.example.blog.entity.User;
 import com.example.blog.exceptions.ResourceNotFoundException;
@@ -7,6 +8,7 @@ import com.example.blog.model.JwtRequest;
 import com.example.blog.model.JwtResponse;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.security.JwtHelper;
+import com.example.blog.services.LogEntryService;
 import com.example.blog.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,8 @@ public class AuthController {
     private  UserService userService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Autowired
     private JwtHelper helper;
@@ -64,6 +68,14 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto){
         UserDto registeredUser=this.userService.registerNewUser(userDto);
+
+        logEntryService.logAction(
+                userDto.getUserName(),
+                "CREATED",
+                EntityType.USER,
+                userDto.getUserName(),
+                "User Created:"+userDto.getUserName()
+        );
         return new ResponseEntity<>(registeredUser,HttpStatus.CREATED);
     }
 
