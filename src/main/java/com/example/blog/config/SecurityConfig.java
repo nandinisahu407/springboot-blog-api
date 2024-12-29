@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ULS).permitAll()
                         .requestMatchers("/api/users/*/assignRole").hasAnyRole("ADMIN","SUPER_ADMIN") // Protect the role assignment endpoint
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEWER", "NORMAL", "ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/categories/**").hasAnyRole( "NORMAL","ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

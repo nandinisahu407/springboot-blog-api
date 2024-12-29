@@ -1,6 +1,7 @@
 package com.example.blog.controllers;
 
 import com.example.blog.config.SecurityUtils;
+import com.example.blog.constants.EntityType;
 import com.example.blog.dto.PostDto;
 import com.example.blog.entity.Post;
 import com.example.blog.entity.User;
@@ -8,6 +9,7 @@ import com.example.blog.exceptions.ResourceNotFoundException;
 import com.example.blog.payload.PostResponse;
 import com.example.blog.repository.PostRepository;
 import com.example.blog.services.FileService;
+import com.example.blog.services.LogEntryService;
 import com.example.blog.services.PostService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
@@ -39,6 +41,8 @@ public class PostController {
     private SecurityUtils securityUtils;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private LogEntryService logEntryService;
     @Value("${project.image}")
     private String path;
 
@@ -47,6 +51,16 @@ public class PostController {
     @PostMapping("/user/{userId}/category/{categoryId}/posts")
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId){
         PostDto savedPost=this.postService.createPost(postDto,userId,categoryId);
+
+        //adding logs
+        User loggedInUser = securityUtils.getLoggedInUserDetails();
+        logEntryService.logAction(
+                loggedInUser.getname(),
+                "CREATED",
+                EntityType.POST,
+                postDto.getUser().getUserName(),
+                "Post created with title:"+postDto.getTitle()
+        );
         return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }
 
@@ -82,6 +96,14 @@ public class PostController {
 
         //admin,super-admin,normal(owner)
         String resp=this.postService.updatePost(updatedPost,postId);
+        //adding logs
+        logEntryService.logAction(
+                loggedInUser.getname(),
+                "UPDATED",
+                EntityType.POST,
+                updatedPost.getUser().getUserName(),
+                "Post updated with title:"+updatedPost.getTitle()
+        );
         return new ResponseEntity<>(resp,HttpStatus.OK);
     }
 
@@ -103,6 +125,14 @@ public class PostController {
 
         //admin,super-admin,normal(owner)
         String resp=this.postService.deletePost(postId);
+        //adding logs
+        logEntryService.logAction(
+                loggedInUser.getname(),
+                "DELETED",
+                EntityType.POST,
+                postTOBeDeleted.getUser().getname(),
+                "Post deleted with title:"+postTOBeDeleted.getTitle()
+        );
         return new ResponseEntity<>(resp,HttpStatus.OK);
     }
 
