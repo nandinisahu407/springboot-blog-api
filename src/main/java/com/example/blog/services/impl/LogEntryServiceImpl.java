@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class LogEntryServiceImpl implements LogEntryService {
 
@@ -25,5 +27,15 @@ public class LogEntryServiceImpl implements LogEntryService {
         newLog.setTimeStamp(LocalDateTime.now());
 
         this.logEntryRepository.save(newLog);
+    }
+
+    @Override
+    public List<LogEntry> findActionsByUserName(String name) {
+        return this.logEntryRepository.findActionsPerformedByUser(name);
+    }
+
+    @Override
+    public List<LogEntry> findAllLogsPerformedOnEntity(String name) {
+        return this.logEntryRepository.findAllLogs(name);
     }
 }
